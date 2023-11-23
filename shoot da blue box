@@ -1,0 +1,94 @@
+import pygame
+import random
+from pygame.locals import *
+
+pygame.init()
+
+projectileX = 0
+projectileY = 0
+kills=0
+escapes=0
+
+green = (0, 255, 0)
+blue = (0, 0, 255)
+black = (0, 0, 0)
+white = (255, 255, 255)
+orange = (255, 165, 0)
+
+explosion_noises = ['BOOM!', 'KABOOM!', 'BAM!', 'BOOOM!']
+
+font = pygame.font.Font(None, 20)
+collision_text = font.render(explosion_noises[random.randint(0,3)], True, white)
+welcome_text = font.render("welcome to shoot da blue box.in this game you shoot da box 10 times to win.good luck!", True, white)
+win_text = font.render("YOU WON!", True, white)
+lose_text = font.render("you lose", True, white)
+
+boxX = 0
+boxY = 0
+width = 20
+height = 20
+shoot = 4
+boxX2 = 480
+boxY2 = random.randint(0,480)
+width2 = 20
+height2 = 20
+surface = pygame.display.set_mode((500, 500))
+surface.fill(black)
+clock = pygame.time.Clock()
+
+while True:
+    surface.blit(welcome_text, (0, 0))
+    clock.tick(30)
+    surface.fill(black)
+    rect = pygame.Rect(boxX, boxY, width, height)
+    pygame.draw.rect(surface, green, rect)
+    target = pygame.Rect(boxX2, boxY2, width2, height2)
+    pygame.draw.rect(surface, blue, target)
+
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            exit()
+
+    keys = pygame.key.get_pressed()
+    if keys[K_RIGHT]:
+        boxX += 5
+    if keys[K_LEFT]:
+        boxX -= 5
+    if keys[K_UP]:
+        boxY -= 5
+    if keys[K_DOWN]:
+        boxY += 5
+
+    if keys[K_SPACE] and shoot%4==0:
+        projectileX = boxX
+        projectileY = boxY
+
+    projectileX += 25
+    rect2 = pygame.Rect(projectileX, projectileY, width-10, height-10)
+    pygame.draw.rect(surface, green, rect2)
+    if rect2.colliderect(target):
+        explosion = pygame.Rect(projectileX, projectileY, 30, 30)
+        pygame.draw.rect(surface, orange, explosion)
+        surface.blit(collision_text, (boxX2, boxY2+10))
+        boxX2 = 480
+        boxY2 = random.randint(0,480)
+        kills +=1
+    else:
+        boxX2 -=7
+        if boxX2<0:
+            boxX2=480
+            boxY2 = random.randint(0,480)
+            escapes+=1
+    if kills>9:
+        surface.blit(win_text, (100, 100))
+        pygame.time.delay(1000)
+        pygame.quit()
+    shoot-=0.25
+    if escapes>4:
+        surface.blit(lose_text, (100, 100))
+        boom = pygame.Rect(boxX, boxY, 30, 30)
+        pygame.draw.rect(surface, orange, boom)
+        pygame.time.delay(1000)
+        pygame.quit()
+    pygame.display.update()
